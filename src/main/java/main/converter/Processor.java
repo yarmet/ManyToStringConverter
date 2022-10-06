@@ -10,11 +10,11 @@ import static main.converter.Degree.EMPTY;
 public class Processor {
 
 
-    public static String parseString(long value, Currency currency) {
-        if (value == 0) {
-            return Digits.geEnumByValue(Math.toIntExact(value)).getMaleName().concat(" ").concat(currency.getThirdForm());
-        }
+    public static List<String> parseString(long value, Currency currency) {
         List<String> result = new ArrayList<>();
+        if (value == 0) {
+            return makeZero(result, value, currency);
+        }
         int lastDigit = 0;
         Degree degree = EMPTY;
         for (Map.Entry<Integer, Degree> entry : divideByDegree(value)) {
@@ -38,7 +38,14 @@ public class Processor {
             }
         }
         result.add(getManyForm(lastDigit, degree, currency));
-        return String.join(" ", result);
+        return result;
+    }
+
+
+    private static List<String> makeZero(List<String> result, long value, Currency currency) {
+        result.add(Digits.geEnumByValue(Math.toIntExact(value)).getMaleName());
+        result.add(currency.getThirdForm());
+        return result;
     }
 
 

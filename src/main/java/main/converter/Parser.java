@@ -2,6 +2,7 @@ package main.converter;
 
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class Parser {
 
@@ -25,21 +26,16 @@ public class Parser {
         } catch (Exception e) {
             throw new RuntimeException("Неизвестный тип валюты : " + alphabeticCode);
         }
-
-
         long wholeSum = getWhole(sum);
         String fractional = getFractional(sum);
 
-        String wholePart = Processor.parseString(wholeSum, wholeCurrency);
+        List<String> result = Processor.parseString(wholeSum, wholeCurrency);
         String fractionalCurrencyName = Processor.getFormType(Integer.parseInt(fractional), fractionalCurrency);
 
-        return new StringBuilder()
-                .append(wholePart)
-                .append(" ")
-                .append(fractional)
-                .append(" ")
-                .append(fractionalCurrencyName)
-                .toString();
+        result.add(fractional);
+        result.add(fractionalCurrencyName);
+
+        return String.join(" ", result);
     }
 
     /**
