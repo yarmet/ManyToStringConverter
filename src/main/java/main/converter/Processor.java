@@ -13,7 +13,7 @@ public class Processor {
     public static List<String> parseString(long value, Currency currency) {
         List<String> result = new ArrayList<>();
         if (value == 0) {
-            return makeZero(result, value, currency);
+            return makeZero(result, currency);
         }
         int lastDigit = 0;
         Degree degree = EMPTY;
@@ -42,8 +42,8 @@ public class Processor {
     }
 
 
-    private static List<String> makeZero(List<String> result, long value, Currency currency) {
-        result.add(Digits.geEnumByValue(Math.toIntExact(value)).getMaleName());
+    private static List<String> makeZero(List<String> result, Currency currency) {
+        result.add(Digits.geEnumByValue(0).getMaleName());
         result.add(currency.getThirdForm());
         return result;
     }
