@@ -11,10 +11,10 @@ public class Processor {
 
 
     public static List<String> parseString(long value, Currency currency) {
-        List<String> result = new ArrayList<>();
         if (value == 0) {
-            return makeZero(result, currency);
+            return makeZero(currency);
         }
+        List<String> result = new ArrayList<>();
         int lastDigit = 0;
         Degree degree = EMPTY;
         for (Map.Entry<Integer, Degree> entry : divideByDegree(value)) {
@@ -23,27 +23,28 @@ public class Processor {
             List<Integer> splitedNumber = splitNumber(fullNumber);
             for (int j = 0; j < splitedNumber.size(); j++) {
                 lastDigit = splitedNumber.get(j);
-                Digits digitEnum = Digits.geEnumByValue(lastDigit); // Преобразовываем число в строку
-                boolean lastValue = j == splitedNumber.size() - 1;
-                if (lastValue) {
+                Digits digit = Digits.geEnumByValue(lastDigit); // Преобразовываем число в строку
+                boolean isLastValue = j == splitedNumber.size() - 1;
+                if (isLastValue) {
                     if (degree.hasName()) {
-                        result.add(getDigitGenderByDegree(digitEnum, degree));
+                        result.add(getDigitGenderByDegree(digit, degree));
                         result.add(getFormType(lastDigit, degree));
                     } else {
-                        result.add(getDigitGenderByMany(digitEnum, currency));
+                        result.add(getDigitGenderByMany(digit, currency));
                     }
                 } else {
-                    result.add(digitEnum.getMaleName());
+                    result.add(digit.getMaleName());
                 }
             }
         }
-        result.add(getManyForm(lastDigit, degree, currency));
+        result.add(getCurrencyForm(lastDigit, degree, currency));
         return result;
     }
 
 
-    private static List<String> makeZero(List<String> result, Currency currency) {
-        result.add(Digits.geEnumByValue(0).getMaleName());
+    private static List<String> makeZero(Currency currency) {
+        List<String> result = new ArrayList<>(2);
+        result.add(Digits.ZERO.getMaleName());
         result.add(currency.getThirdForm());
         return result;
     }
@@ -59,12 +60,10 @@ public class Processor {
     }
 
 
-    private static String getManyForm(int lastDigit, Degree degree, Currency currency) {
-        if (degree != EMPTY) {
-            return currency.getThirdForm();
-        }
-        return getFormType(lastDigit, currency);
+    private static String getCurrencyForm(int lastDigit, Degree degree, Currency currency) {
+        return degree == EMPTY ? getFormType(lastDigit, currency) : currency.getThirdForm();
     }
+
 
     /**
      * Разбирает число на составляющие, по 3 знака. <br/>
@@ -75,10 +74,9 @@ public class Processor {
      */
     private static List<Map.Entry<Integer, Degree>> divideByDegree(long value) {
         List<Map.Entry<Integer, Degree>> result = new ArrayList<>();
-        int valuePiece;
         for (Degree degree : Degree.values()) {
             long length = degree.getLength();
-            valuePiece = Math.toIntExact(value / length);
+            int valuePiece = Math.toIntExact(value / length);
             if (valuePiece != 0) {
                 result.add(Map.entry(valuePiece, degree));
             }
@@ -89,7 +87,7 @@ public class Processor {
 
 
     /**
-     * Получает число в диапазоне от 0 до 999 и раскладывает его на состовляющие. Так же присылает признак, является ли составляющее последним <br/>
+     * Получает число в диапазоне от 0 до 999 и раскладывает его на состовляющие.<br/>
      * Пример работы: <br/>
      * На вход 999, на выходе: 900, 90,9 <br/>
      * На вход 512, на выходе: 500, 12 <br/>
@@ -125,7 +123,7 @@ public class Processor {
         while (v >= 10) {
             v %= 10;
         }
-        return Math.toIntExact(v);
+        return v;
     }
 
 
